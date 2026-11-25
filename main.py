@@ -47,8 +47,15 @@ def main() -> None:
     text = WINNING_LINE
     assert 1 <= len(text) <= 200, f"entry must be 1-200 chars, got {len(text)}"
     assert text.strip(), "entry must not be only whitespace"
+    assert "\n" not in text and "\r" not in text, "entry must be a single line"
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUTPUT_DIR / "entry.txt").write_text(text, encoding="utf-8")
+    out = OUTPUT_DIR / "entry.txt"
+    out.write_text(text, encoding="utf-8")
+    # Write-back verification: a partial write or newline translation
+    # must never silently change what the judge reads.
+    assert out.read_bytes() == text.encode("utf-8"), (
+        "entry.txt does not match the winning line byte for byte"
+    )
 
 
 if __name__ == "__main__":
